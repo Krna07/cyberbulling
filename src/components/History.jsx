@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import AnalysisDetailModal from './AnalysisDetailModal';
 
 function History({ refreshKey }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState(null);
 
   useEffect(() => {
     fetchHistory();
@@ -115,16 +117,20 @@ function History({ refreshKey }) {
           {Array.isArray(history) && history.map((item) => (
             <div
               key={item._id}
-              className={`p-3 rounded-lg border transition-all hover:shadow-md relative group ${
+              onClick={() => setSelectedAnalysis(item)}
+              className={`p-3 rounded-lg border transition-all hover:shadow-md relative group cursor-pointer ${
                 item.prediction === 'Cyberbullying Detected'
                   ? 'bg-red-50 border-red-200 hover:border-red-300'
                   : 'bg-green-50 border-green-200 hover:border-green-300'
               }`}
             >
               <button
-                onClick={() => handleDelete(item._id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(item._id);
+                }}
                 disabled={deleting === item._id}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-800 p-1 rounded hover:bg-white"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-800 p-1 rounded hover:bg-white z-10"
                 title="Delete this analysis"
               >
                 {deleting === item._id ? (
@@ -152,9 +158,19 @@ function History({ refreshKey }) {
                 </span>
                 <span>{new Date(item.timestamp).toLocaleTimeString()}</span>
               </div>
+              <div className="mt-2 text-xs text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                Click to view full report →
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {selectedAnalysis && (
+        <AnalysisDetailModal
+          analysis={selectedAnalysis}
+          onClose={() => setSelectedAnalysis(null)}
+        />
       )}
     </div>
   );
