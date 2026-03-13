@@ -21,7 +21,7 @@ function History({ refreshKey }) {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/history?limit=20', {
+      const response = await fetch('https://cyberbully-backend.onrender.com/api/history?limit=20', {
         headers: getAuthHeaders()
       });
       
@@ -45,7 +45,7 @@ function History({ refreshKey }) {
     
     setDeleting(id);
     try {
-      const response = await fetch(`http://localhost:5001/api/analysis/${id}`, {
+      const response = await fetch(`https://cyberbully-backend.onrender.com/api/analysis/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -68,7 +68,7 @@ function History({ refreshKey }) {
     
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/analysis', {
+      const response = await fetch('https://cyberbully-backend.onrender.com/api/analysis', {
         method: 'DELETE',
         headers: getAuthHeaders()
       });

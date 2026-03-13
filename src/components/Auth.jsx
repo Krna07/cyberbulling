@@ -29,7 +29,7 @@ function Auth({ onLogin }) {
         ? { email: formData.email, password: formData.password }
         : formData;
 
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(`https://cyberbully-backend.onrender.com${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

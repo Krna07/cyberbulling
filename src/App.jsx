@@ -28,7 +28,7 @@ function App() {
 
     if (token && savedUser) {
       try {
-        const response = await fetch('http://localhost:5001/api/auth/verify', {
+        const response = await fetch('https://cyberbully-backend.onrender.com/api/auth/verify', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -76,7 +76,7 @@ function App() {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      const response = await fetch('http://localhost:5001/api/stats', {
+      const response = await fetch('https://cyberbully-backend.onrender.com/api/stats', {
         headers: getAuthHeaders()
       });
       
@@ -100,7 +100,7 @@ function App() {
     setAnalyzedText(text);
     
     try {
-      const response = await fetch('http://localhost:5001/api/analyze', {
+      const response = await fetch('https://cyberbully-backend.onrender.com/api/analyze', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ text })
