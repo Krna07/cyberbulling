@@ -4,11 +4,16 @@ import ResultCard from './components/ResultCard';
 import Dashboard from './components/Dashboard';
 import History from './components/History';
 import Auth from './components/Auth';
+import ChatBot from './components/ChatBot';
+import Community from './components/Community';
+import Footer from './components/Footer';
+import ComplaintsPortal from './components/ComplaintsPortal';
 
 function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [analyzedText, setAnalyzedText] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState({
     totalMessages: 0,
     bullyingCount: 0,
@@ -161,13 +166,55 @@ function App() {
           </div>
         </div>
         
+        {/* Tabs */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-5 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                activeTab === 'dashboard'
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+               <b>Dashboard</b>
+            </button>
+            <button
+              onClick={() => setActiveTab('community')}
+              className={`px-5 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                activeTab === 'community'
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <b>Community : <i>people like You</i></b>
+            </button>
+            <button
+              onClick={() => setActiveTab('complaints')}
+              className={`px-5 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                activeTab === 'complaints'
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <b>File Reports</b>
+            </button>
+          </div>
+
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Dashboard & Input */}
           <div className="lg:col-span-2 space-y-6">
-            <Dashboard analytics={analytics} />
-            <MessageInput onAnalyze={handleAnalyze} loading={loading} />
-            {result && <ResultCard result={result} originalText={analyzedText} />}
+            {activeTab === 'dashboard' ? (
+              <>
+                <Dashboard analytics={analytics} />
+                <MessageInput onAnalyze={handleAnalyze} loading={loading} />
+                {result && <ResultCard result={result} originalText={analyzedText} />}
+              </>
+            ) : activeTab === 'community' ? (
+              <Community />
+            ) : (
+              <ComplaintsPortal />
+            )}
           </div>
           
           {/* Right Column - History */}
@@ -178,6 +225,8 @@ function App() {
           </div>
         </div>
       </div>
+      {user && <ChatBot />}
+      <Footer />
     </div>
   );
 }
