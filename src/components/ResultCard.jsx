@@ -1,6 +1,63 @@
 import HighlightedText from './HighlightedText';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ReportModal from './ReportModal';
+import Chart from 'chart.js/auto';
+
+const CATEGORY_CONFIG = {
+  toxic:         { label: 'Toxic',         icon: '🔴', color: '#ef4444' },
+  severe_toxic:  { label: 'Severe Toxic',  icon: '⛔', color: '#991b1b' },
+  obscene:       { label: 'Obscene',       icon: '🚫', color: '#f97316' },
+  threat:        { label: 'Threat',        icon: '⚠️', color: '#a855f7' },
+  insult:        { label: 'Insult',        icon: '💢', color: '#eab308' },
+  identity_hate: { label: 'Identity Hate', icon: '🚨', color: '#ec4899' },
+};
+
+function CategoryPieChart({ categories }) {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  useEffect(() => {
+    if (!chartRef.current || !categories) return;
+    if (chartInstance.current) chartInstance.current.destroy();
+
+    const keys = Object.keys(CATEGORY_CONFIG);
+    const values = keys.map(k => (categories[k] || 0) * 100);
+    const hasAny = values.some(v => v > 0);
+
+    // if all zero show equal slices greyed out
+    const data = hasAny ? values : keys.map(() => 1);
+    const colors = hasAny
+      ? keys.map(k => CATEGORY_CONFIG[k].color)
+      : keys.map(() => '#e5e7eb');
+
+    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: keys.map(k => CATEGORY_CONFIG[k].label),
+        datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 11 }, padding: 8 } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => hasAny
+                ? ` ${ctx.label}: ${ctx.parsed === 100 ? 'Detected' : ctx.parsed === 0 ? 'Not detected' : ctx.parsed + '%'}`
+                : ` ${ctx.label}: Not detected`
+            }
+          }
+        }
+      }
+    });
+
+    return () => { if (chartInstance.current) chartInstance.current.destroy(); };
+  }, [categories]);
+
+  return <canvas ref={chartRef}></canvas>;
+}
+
 
 function ResultCard({ result, originalText }) {
   const [showReportModal, setShowReportModal] = useState(false);
@@ -63,7 +120,43 @@ function ResultCard({ result, originalText }) {
         </div>
       </div>
 
-      {isBullying && result.toxicKeywords && result.toxicKeywords.length > 0 && (
+      {/* Category Labels Pie Chart — always shown */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <p className="text-gray-700 font-semibold mb-3">Toxicity Label Breakdown</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Pie chart */}
+          <div className="h-52 bg-white rounded-lg border border-gray-200 p-2">
+            <CategoryPieChart categories={result.categories} />
+          </div>
+          {/* Label badges */}
+          <div className="grid grid-cols-2 gap-2 content-start">
+            {Object.entries(CATEGORY_CONFIG).map(([key, { label, icon, color }]) => {
+              const active = result.categories?.[key] === 1;
+              return (
+                <div
+                  key={key}
+                  className={`flex items-center gap-2 p-2 rounded-lg border text-sm font-medium transition-all ${
+                    active
+                      ? 'bg-white border-gray-300 text-gray-800 shadow-sm'
+                      : 'bg-gray-50 border-gray-200 text-gray-400'
+                  }`}
+                >
+                  <span
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: active ? color : '#d1d5db' }}
+                  />
+                  <span>{icon} {label}</span>
+                  {active && (
+                    <span className="ml-auto text-xs font-bold" style={{ color }}>✓</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+
         <div className="mt-6 pt-4 border-t border-red-200">
           <p className="text-gray-700 font-semibold mb-2">Analyzed Message</p>
           <div className="bg-white p-4 rounded border border-red-200">
